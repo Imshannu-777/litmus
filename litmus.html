@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>litmus — a tone test for your text</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Sora:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241F3D;
+    --ink-soft:#5A5478;
+    --card:rgba(255,255,255,0.72);
+    --card-solid:#FFFFFF;
+    --border:rgba(36,31,61,0.09);
+
+    --coral:#FF6B5B;
+    --coral-bg:#FFE4E0;
+    --teal:#14B892;
+    --teal-bg:#D6F7ED;
+    --violet:#8B7FD9;
+    --violet-bg:#ECE8FB;
+    --yellow:#FFB627;
+    --yellow-bg:#FFF2D6;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family:'Sora', sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 12% 8%, #EAFBF3 0%, transparent 45%),
+      radial-gradient(circle at 88% 6%, #F1ECFB 0%, transparent 45%),
+      radial-gradient(circle at 50% 100%, #FFF3E2 0%, transparent 50%),
+      #FBFAF7;
+    padding:44px 18px 70px;
+    position:relative;
+    overflow-x:hidden;
+  }
+  .blob{
+    position:fixed;
+    border-radius:50%;
+    filter:blur(60px);
+    opacity:.55;
+    z-index:0;
+    pointer-events:none;
+  }
+  .blob1{ width:340px; height:340px; background:#CFF6E6; top:-120px; left:-100px; }
+  .blob2{ width:300px; height:300px; background:#E4DBFB; top:120px; right:-120px; }
+  .blob3{ width:280px; height:280px; background:#FFE7C7; bottom:-100px; left:30%; }
+
+  .wrap{ max-width:820px; margin:0 auto; position:relative; z-index:1; }
+
+  /* ---------- Header ---------- */
+  header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:14px; }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand-mark{ width:34px; height:34px; }
+  .brand-name{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:22px;
+    letter-spacing:-0.01em;
+  }
+  .badge-live{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    color:var(--teal);
+    background:var(--teal-bg);
+    padding:6px 12px;
+    border-radius:100px;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .badge-live::before{ content:""; width:6px; height:6px; border-radius:50%; background:var(--teal); }
+
+  .hero{ display:flex; align-items:center; gap:26px; margin:26px 0 34px; flex-wrap:wrap; }
+  .hero-text{ flex:1; min-width:260px; }
+  h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:clamp(34px,5vw,46px);
+    line-height:1.05;
+    letter-spacing:-0.02em;
+    margin:0 0 12px;
+  }
+  h1 .accent{ color:var(--teal); }
+  .lede{ color:var(--ink-soft); font-size:15.5px; line-height:1.65; max-width:46ch; }
+
+  /* ---------- Signature test tube ---------- */
+  .tube-wrap{ flex-shrink:0; width:110px; display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .tube-label{ font-family:'Space Mono', monospace; font-size:10px; color:var(--ink-soft); text-align:center; }
+
+  /* ---------- Input card ---------- */
+  .card{
+    background:var(--card);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--border);
+    border-radius:22px;
+    box-shadow:0 20px 50px rgba(90,84,120,.10);
+  }
+  .input-card{ padding:6px; margin-bottom:16px; }
+  .input-top{
+    display:flex; align-items:center; gap:8px;
+    padding:14px 20px 0;
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+  }
+  textarea{
+    width:100%;
+    border:none;
+    background:transparent;
+    resize:vertical;
+    min-height:120px;
+    padding:10px 20px 18px;
+    font-family:'Sora', sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    color:var(--ink);
+    outline:none;
+  }
+  textarea::placeholder{ color:#B4AECB; }
+
+  .controls{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:40px; }
+  .controls-left{ display:flex; gap:8px; flex-wrap:wrap; }
+  .pill-btn{
+    font-family:'Sora', sans-serif;
+    font-size:12.5px; font-weight:500;
+    background:var(--card-solid);
+    border:1px solid var(--border);
+    color:var(--ink-soft);
+    padding:9px 16px;
+    border-radius:100px;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .pill-btn:hover{ border-color:var(--violet); color:var(--violet); transform:translateY(-1px); }
+
+  .test-btn{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:14.5px;
+    background:linear-gradient(135deg, #17C79B, #7C6EE8);
+    color:#fff;
+    border:none;
+    padding:14px 28px;
+    border-radius:100px;
+    cursor:pointer;
+    box-shadow:0 10px 24px rgba(124,110,232,.35);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .test-btn:hover{ transform:translateY(-2px); box-shadow:0 14px 30px rgba(124,110,232,.45); }
+  .test-btn:active{ transform:translateY(0); }
+
+  /* ---------- Plus button for file upload ---------- */
+  .plus-btn {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    background:var(--card-solid);
+    border:1px solid var(--border);
+    color:var(--violet);
+    font-size:24px;
+    font-weight:700;
+    cursor:pointer;
+    transition:all .15s ease;
+    margin:10px 20px; /* adjust spacing as needed */
+  }
+
+  .plus-btn:hover {
+    border-color:var(--teal);
+    color:var(--teal);
+    transform:translateY(-1px);
+  }
+
+
+  /* ---------- Section header ---------- */
+  .sec-head{ display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+  .sec-icon{
+    width:32px; height:32px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .sec-title{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:18px; }
+  .sec-note{ margin-left:auto; font-family:'Space Mono', monospace; font-size:11px; color:var(--ink-soft); }
+  .section{ margin-bottom:38px; }
+
+  /* ---------- Annotated text ---------- */
+  .annotated-card{ padding:22px 24px; font-size:15.5px; line-height:2.05; }
+  .ch{ border-radius:4px; padding:1px 1px; }
+  .ch.up{ background:var(--yellow-bg); box-shadow:inset 0 -2px 0 var(--yellow); font-weight:600; }
+  .ch.digit{ background:var(--violet-bg); box-shadow:inset 0 -2px 0 var(--violet); font-weight:600; color:var(--violet); }
+  .ch.other{ background:var(--coral-bg); box-shadow:inset 0 -2px 0 var(--coral); font-weight:600; color:var(--coral); }
+  .legend{ display:flex; gap:16px; flex-wrap:wrap; font-family:'Space Mono', monospace; font-size:10.5px; color:var(--ink-soft); margin-top:12px; padding-left:2px; }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .sw{ width:9px; height:9px; border-radius:3px; display:inline-block; }
+
+  /* ---------- Ingredient rings ---------- */
+  .ring-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(120px,1fr)); gap:12px; }
+  .ring-card{ padding:18px 14px; text-align:center; }
+  .ring-label{ font-size:11.5px; color:var(--ink-soft); margin-top:8px; }
+  .ring-num{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:15px; }
+
+  /* ---------- Reaction (sentence) cards ---------- */
+  .reaction-list{ display:flex; flex-direction:column; gap:10px; }
+  .reaction-card{ padding:15px 18px; display:flex; align-items:flex-start; gap:13px; }
+  .drop{ width:22px; height:22px; flex-shrink:0; margin-top:1px; }
+  .reaction-text{ font-size:14.5px; line-height:1.55; flex:1; }
+  .reaction-tag{
+    font-family:'Space Mono', monospace;
+    font-size:10.5px;
+    padding:4px 10px;
+    border-radius:100px;
+    flex-shrink:0;
+    white-space:nowrap;
+    margin-top:1px;
+  }
+  .reaction-tag.pos{ background:var(--teal-bg); color:var(--teal); }
+  .reaction-tag.neg{ background:var(--coral-bg); color:var(--coral); }
+  .reaction-tag.neu{ background:var(--violet-bg); color:var(--violet); }
+
+  /* ---------- Word molecules ---------- */
+  .molecule-field{ display:flex; flex-wrap:wrap; gap:8px; padding:20px; }
+  .molecule{
+    font-family:'Space Mono', monospace;
+    font-size:12.5px;
+    background:var(--card-solid);
+    border:1px solid var(--border);
+    padding:6px 13px;
+    border-radius:100px;
+    box-shadow:0 4px 10px rgba(90,84,120,.06);
+  }
+
+  /* ---------- pH reading ---------- */
+  .ph-panel{ padding:30px 26px 26px; display:flex; gap:32px; align-items:center; flex-wrap:wrap; }
+  .ph-visual{ flex-shrink:0; }
+  .ph-info{ flex:1; min-width:220px; }
+  .ph-verdict{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:28px; margin-bottom:4px; }
+  .ph-sub{ font-family:'Space Mono', monospace; font-size:12px; color:var(--ink-soft); margin-bottom:18px; }
+  .scale-track{
+    height:14px; border-radius:100px;
+    background:linear-gradient(90deg, var(--coral) 0%, var(--violet) 50%, var(--teal) 100%);
+    position:relative;
+  }
+  .scale-marker{
+    position:absolute; top:50%;
+    width:22px; height:22px;
+    background:#fff;
+    border:3px solid var(--ink);
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+    transition:left .5s cubic-bezier(.2,.9,.15,1);
+    box-shadow:0 4px 10px rgba(36,31,61,.25);
+  }
+  .scale-labels{ display:flex; justify-content:space-between; margin-top:9px; font-family:'Space Mono', monospace; font-size:10.5px; color:var(--ink-soft); }
+
+  .empty-state{ text-align:center; padding:30px 0 8px; color:var(--ink-soft); font-size:13px; }
+  footer{ text-align:center; margin-top:34px; font-family:'Space Mono', monospace; font-size:10.5px; color:var(--ink-soft); }
+
+  #results{ display:none; }
+
+  @keyframes bob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-3px); } }
+  #liquidGroup{ transition: transform .6s ease; }
+  .bubble{ animation: rise 3.2s ease-in infinite; }
+  @keyframes rise{
+    0%{ transform:translateY(0); opacity:0; }
+    15%{ opacity:.8; }
+    100%{ transform:translateY(-46px); opacity:0; }
+  }
+
+  @media (max-width:600px){
+    .hero{ flex-direction:column; align-items:flex-start; }
+    .ph-panel{ flex-direction:column; text-align:center; }
+    .ph-info{ width:100%; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .bubble{ animation:none; }
+    #liquidGroup{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+<div class="blob blob3"></div>
+
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 34 34" fill="none">
+        <path d="M13 4h8v9l6 12a3 3 0 01-2.7 4.3H9.7A3 3 0 017 25l6-12V4z" stroke="#241F3D" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M10.5 20h13" stroke="#241F3D" stroke-width="2"/>
+        <path d="M13 4h8" stroke="#241F3D" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+      <span class="brand-name">litmus</span>
+    </div>
+    <span class="badge-live">runs in your browser</span>
+  </header>
+
+  <div class="hero">
+    <div class="hero-text">
+      <h1>A quick <span class="accent">tone test</span><br>for your sentences.</h1>
+      <p class="lede">Pour any sentence or paragraph in. It gets broken down into sentences, words, and characters — then read for tone, the way a strip of litmus paper reads a solution.</p>
+    </div>
+    <div class="tube-wrap">
+      <svg width="70" height="110" viewBox="0 0 70 110" fill="none">
+        <defs>
+          <clipPath id="tubeClip">
+            <path d="M22 6h26v52c0 4 2 7 4 11l8 16a10 10 0 01-9 15H19a10 10 0 01-9-15l8-16c2-4 4-7 4-11V6z"/>
+          </clipPath>
+        </defs>
+        <path d="M22 6h26v52c0 4 2 7 4 11l8 16a10 10 0 01-9 15H19a10 10 0 01-9-15l8-16c2-4 4-7 4-11V6z" fill="#FCFBFA" stroke="#241F3D" stroke-width="2"/>
+        <g clip-path="url(#tubeClip)">
+          <g id="liquidGroup" transform="translate(0,55)">
+            <rect x="0" y="0" width="70" height="70" id="liquidFill" fill="#8B7FD9"/>
+            <circle class="bubble" cx="28" cy="45" r="2.2" fill="#ffffff" opacity=".5" style="animation-delay:0s"/>
+            <circle class="bubble" cx="40" cy="50" r="1.6" fill="#ffffff" opacity=".5" style="animation-delay:1s"/>
+            <circle class="bubble" cx="34" cy="40" r="1.8" fill="#ffffff" opacity=".5" style="animation-delay:2s"/>
+          </g>
+        </g>
+        <path d="M22 6h26v52c0 4 2 7 4 11l8 16a10 10 0 01-9 15H19a10 10 0 01-9-15l8-16c2-4 4-7 4-11V6z" fill="none" stroke="#241F3D" stroke-width="2"/>
+        <rect x="19" y="3" width="32" height="6" rx="2" fill="#241F3D"/>
+      </svg>
+      <div class="tube-label">live reading</div>
+    </div>
+  </div>
+
+  <div class="card input-card">
+    <div class="input-top">
+      <span>✎ specimen</span>
+    </div>
+    <textarea id="inputText" placeholder="Type or paste a sentence to test..."></textarea>
+    <!-- Hidden file input -->
+    <input type="file" id="fileInput" accept=".txt,.docx,.pdf" style="display:none">
+
+    <!-- Styled button/label with plus symbol -->
+    <label for="fileInput" class="plus-btn">+</label>
+
+  </div>
+
+  <div class="controls">
+    <div class="controls-left">
+      <button class="pill-btn" onclick="loadSample(1)">Product review</button>
+      <button class="pill-btn" onclick="loadSample(2)">News snippet</button>
+      <button class="pill-btn" onclick="loadSample(3)">Clear</button>
+    </div>
+    <button class="test-btn" onclick="runAnalysis()">Test it →</button>
+  </div>
+
+  <div id="results">
+
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-icon" style="background:var(--yellow-bg);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 20h16M8 16l4-12 4 12M6.5 12h7" stroke="#B8860B" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <span class="sec-title">Character trace</span>
+      </div>
+      <div class="card annotated-card" id="annotatedText"></div>
+      <div class="legend">
+        <span><span class="sw" style="background:var(--yellow);"></span>Uppercase</span>
+        <span><span class="sw" style="background:#D9D4E8;"></span>Lowercase</span>
+        <span><span class="sw" style="background:var(--violet);"></span>Digit</span>
+        <span><span class="sw" style="background:var(--coral);"></span>Other symbol</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-icon" style="background:var(--violet-bg);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="#6C5FCF" stroke-width="2"/><path d="M12 8v4l3 2" stroke="#6C5FCF" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <span class="sec-title">Ingredients</span>
+        <span class="sec-note" id="charTotalNote"></span>
+      </div>
+      <div class="ring-grid" id="ringGrid"></div>
+    </div>
+
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-icon" style="background:var(--teal-bg);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 5h16v11H8l-4 4V5z" stroke="#0E9575" stroke-width="2" stroke-linejoin="round"/></svg>
+        </div>
+        <span class="sec-title">Reactions</span>
+        <span class="sec-note" id="sentNote"></span>
+      </div>
+      <div class="reaction-list" id="reactionList"></div>
+    </div>
+
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-icon" style="background:var(--coral-bg);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="7" cy="8" r="2.2" stroke="#D9503F" stroke-width="1.8"/><circle cx="17" cy="8" r="2.2" stroke="#D9503F" stroke-width="1.8"/><circle cx="12" cy="16" r="2.2" stroke="#D9503F" stroke-width="1.8"/><path d="M8.7 9.3L11 14M15.3 9.3L13 14" stroke="#D9503F" stroke-width="1.8"/></svg>
+        </div>
+        <span class="sec-title">Molecules</span>
+        <span class="sec-note" id="wordNote"></span>
+      </div>
+      <div class="card molecule-field" id="moleculeField"></div>
+    </div>
+
+    <div class="section" style="margin-bottom:0;">
+      <div class="sec-head">
+        <div class="sec-icon" style="background:var(--yellow-bg);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3l5 9a5 5 0 11-10 0l5-9z" stroke="#B8860B" stroke-width="2" stroke-linejoin="round"/></svg>
+        </div>
+        <span class="sec-title">pH reading</span>
+      </div>
+      <div class="card ph-panel">
+        <div class="ph-visual">
+          <svg width="70" height="90" viewBox="0 0 70 110" fill="none">
+            <path d="M22 6h26v52c0 4 2 7 4 11l8 16a10 10 0 01-9 15H19a10 10 0 01-9-15l8-16c2-4 4-7 4-11V6z" fill="#FCFBFA" stroke="#241F3D" stroke-width="2"/>
+            <g clip-path="url(#tubeClip)">
+              <rect x="0" y="55" width="70" height="55" id="liquidFill2" fill="#8B7FD9"/>
+            </g>
+            <path d="M22 6h26v52c0 4 2 7 4 11l8 16a10 10 0 01-9 15H19a10 10 0 01-9-15l8-16c2-4 4-7 4-11V6z" fill="none" stroke="#241F3D" stroke-width="2"/>
+            <rect x="19" y="3" width="32" height="6" rx="2" fill="#241F3D"/>
+          </svg>
+        </div>
+        <div class="ph-info">
+          <div class="ph-verdict" id="phVerdict">—</div>
+          <div class="ph-sub" id="phSub">compound score 0.00</div>
+          <div class="scale-track"><div class="scale-marker" id="scaleMarker" style="left:50%;"></div></div>
+          <div class="scale-labels"><span>Acidic (negative)</span><span>Neutral</span><span>Basic (positive)</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="empty-state" id="emptyState">Press "Test it →" to run the reading.</div>
+
+  <footer>NO DATA LEAVES THIS PAGE · A LITMUS TEST FOR TEXT</footer>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+
+<script>
+/* ---------------- Tokenization ---------------- */
+function tokenizeSentences(text){
+  text = text.trim();
+  if(!text) return [];
+  const abbr = ["Mr.","Mrs.","Ms.","Dr.","Prof.","Sr.","Jr.","e.g.","i.e.","etc.","vs."];
+  let protectedText = text;
+  abbr.forEach(a => { protectedText = protectedText.split(a).join(a.replace(".", "§")); });
+  const parts = protectedText.split(/(?<=[.!?])\s+(?=[A-Z0-9"'])|(?<=[.!?])$|\n+/);
+  return parts.map(s => s.replace(/§/g, ".").trim()).filter(s => s.length > 0);
+}
+
+function tokenizeWords(text){
+  if(!text) return [];
+  const matches = text.match(/[A-Za-z]+(?:['’-][A-Za-z]+)*|\d+(?:\.\d+)?/g);
+  return matches || [];
+}
+
+function analyzeCharacters(text){
+  const counts = { uppercase:0, lowercase:0, digits:0, whitespace:0, punctuation:0, other:0, total:text.length };
+  const punct = new Set('!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'.split(''));
+  for(const ch of text){
+    if(/[A-Z]/.test(ch)) counts.uppercase++;
+    else if(/[a-z]/.test(ch)) counts.lowercase++;
+    else if(/[0-9]/.test(ch)) counts.digits++;
+    else if(/\s/.test(ch)) counts.whitespace++;
+    else if(punct.has(ch)) counts.punctuation++;
+    else counts.other++;
+  }
+  return counts;
+}
+
+/* ---------------- Lightweight lexicon sentiment ---------------- */
+const POS_WORDS = ["love","loved","loves","amazing","great","good","excellent","fantastic","wonderful","best","happy","awesome","perfect","beautiful","nice","brilliant","delight","delightful","enjoy","enjoyed","enjoyable","superb","impressive","impressed","recommend","recommended","fast","smooth","easy","comfortable","helpful","friendly","positive","glad","pleased","fun","cool","incredible","outstanding","favorite","favourite","reliable","affordable","worth","satisfied","satisfying","charming","elegant","efficient","gorgeous","exciting","excited","grateful","thank","thanks","win","won","success","successful","improve","improved","improvement","fine","solid","valuable","premium","clean","neat","top","strong","stunning","flawless","joy","joyful","peaceful","calm","warm","kind","generous","brave","genuine","refreshing"];
+const NEG_WORDS = ["hate","hated","hates","terrible","bad","awful","horrible","worst","poor","disappointing","disappointed","disappointment","slow","broken","annoying","frustrating","frustrated","angry","sad","unhappy","rude","useless","waste","cheap","fake","fail","failed","failure","problem","issue","issues","bug","buggy","crash","crashed","expensive","overpriced","difficult","hard","confusing","boring","dull","ugly","weak","late","delay","delayed","complain","complaint","regret","sorry","hurt","painful","pain","damage","damaged","defective","faulty","noisy","uncomfortable","dirty","messy","dangerous","risky","scared","afraid","fear","angst","depressed","depressing","hopeless","miserable","disgusting","gross","nasty","harsh","cruel","unfair","lousy","mediocre","subpar","glitchy","laggy","unreliable","inferior"];
+const NEGATORS = new Set(["not","no","never","n't","cannot","can't","won't","don't","doesn't","didn't","isn't","wasn't","aren't","weren't","without","nobody","nothing","neither","nor"]);
+const INTENSIFIERS = { "very":1.4,"extremely":1.6,"really":1.3,"super":1.4,"absolutely":1.5,"totally":1.3,"incredibly":1.5,"so":1.2,"quite":1.15 };
+
+function scoreSentence(sentence){
+  const words = sentence.toLowerCase().match(/[a-z']+/g) || [];
+  let score = 0;
+  let hasCaps = /\b[A-Z]{3,}\b/.test(sentence);
+  let exclaim = (sentence.match(/!/g) || []).length;
+
+  for(let i=0;i<words.length;i++){
+    const w = words[i];
+    let wordScore = 0;
+    if(POS_WORDS.includes(w)) wordScore = 1;
+    else if(NEG_WORDS.includes(w)) wordScore = -1;
+    if(wordScore !== 0){
+      const prev = words[i-1];
+      if(prev && INTENSIFIERS[prev]) wordScore *= INTENSIFIERS[prev];
+      const windowWords = words.slice(Math.max(0,i-3), i);
+      if(windowWords.some(w2 => NEGATORS.has(w2))) wordScore *= -0.85;
+      score += wordScore;
+    }
+  }
+
+  if(hasCaps) score *= 1.15;
+  if(exclaim > 0) score += Math.min(exclaim, 3) * 0.15 * Math.sign(score || 1);
+
+  const compound = Math.tanh(score / 2.5);
+  let label = "Neutral";
+  if(compound >= 0.05) label = "Positive";
+  else if(compound <= -0.05) label = "Negative";
+  return { label, compound };
+}
+
+/* ---------------- Rendering ---------------- */
+function loadSample(n){
+  uploadedFileText = null;
+  const ta = document.getElementById('inputText');
+  if(n===1){
+    ta.value = "I absolutely LOVE my new phone!!! The camera is AMAZING and it cost only $499.\nHowever, the battery life is TERRIBLE and it drains super fast.\nCustomer service was okay, nothing special.";
+  } else if(n===2){
+    ta.value = "Dr. Alvarez announced on Monday that the new policy will take effect immediately. Critics say the decision is disappointing and poorly timed, while supporters call it a bold and necessary step forward.";
+  } else {
+    ta.value = "";
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('emptyState').textContent = 'Enter some text above, then press "Test it →".';
+    return;
+  }
+}
+
+function escapeHtml(s){
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function renderAnnotated(text){
+  const container = document.getElementById('annotatedText');
+  let html = "";
+  for(const ch of text){
+    let cls = null;
+    if(/[A-Z]/.test(ch)) cls = "up";
+    else if(/[a-z]/.test(ch)) cls = null;
+    else if(/[0-9]/.test(ch)) cls = "digit";
+    else if(/\s/.test(ch)) { html += ch; continue; }
+    else if(!/[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]/.test(ch)) cls = "other";
+    else { html += escapeHtml(ch); continue; }
+    html += cls ? `<span class="ch ${cls}">${escapeHtml(ch)}</span>` : escapeHtml(ch);
+  }
+  container.innerHTML = html || "<span style='color:var(--ink-soft)'>Nothing to trace yet.</span>";
+}
+
+function renderRing(val, total, color, label){
+  const r = 26, c = 2*Math.PI*r;
+  const frac = total > 0 ? val/total : 0;
+  const offset = c * (1-frac);
+  return `
+    <div class="card ring-card">
+      <svg width="64" height="64" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="${r}" fill="none" stroke="#EFEBF7" stroke-width="7"/>
+        <circle cx="32" cy="32" r="${r}" fill="none" stroke="${color}" stroke-width="7"
+          stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${offset}"
+          transform="rotate(-90 32 32)"/>
+        <text x="32" y="37" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="15" fill="#241F3D">${val}</text>
+      </svg>
+      <div class="ring-label">${label}</div>
+    </div>
+  `;
+}
+
+function renderRings(counts){
+  const grid = document.getElementById('ringGrid');
+  const total = counts.total || 1;
+  grid.innerHTML =
+    renderRing(counts.uppercase, total, "#FFB627", "Uppercase") +
+    renderRing(counts.lowercase, total, "#B9AFE0", "Lowercase") +
+    renderRing(counts.digits, total, "#8B7FD9", "Digits") +
+    renderRing(counts.whitespace, total, "#C9E4DC", "Whitespace") +
+    renderRing(counts.punctuation, total, "#D9D4E8", "Punctuation") +
+    renderRing(counts.other, total, "#FF6B5B", "Other symbols");
+  document.getElementById('charTotalNote').textContent = `${total} characters`;
+}
+
+function renderSentences(sentences){
+  const list = document.getElementById('reactionList');
+  document.getElementById('sentNote').textContent = `${sentences.length} sentence${sentences.length!==1?'s':''}`;
+  if(sentences.length === 0){
+    list.innerHTML = `<div class="empty-state">No sentences detected.</div>`;
+    return;
+  }
+  list.innerHTML = sentences.map(s => {
+    const r = scoreSentence(s);
+    const tagClass = r.label === "Positive" ? "pos" : r.label === "Negative" ? "neg" : "neu";
+    const dropColor = r.label === "Positive" ? "#14B892" : r.label === "Negative" ? "#FF6B5B" : "#8B7FD9";
+    return `
+      <div class="card reaction-card">
+        <svg class="drop" viewBox="0 0 24 24" fill="none"><path d="M12 3s7 8 7 13a7 7 0 11-14 0c0-5 7-13 7-13z" fill="${dropColor}" opacity="0.85"/></svg>
+        <span class="reaction-text">${escapeHtml(s)}</span>
+        <span class="reaction-tag ${tagClass}">${r.label} ${r.compound>=0?'+':''}${r.compound.toFixed(2)}</span>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderWords(words){
+  const field = document.getElementById('moleculeField');
+  document.getElementById('wordNote').textContent = `${words.length} word${words.length!==1?'s':''}`;
+  if(words.length === 0){
+    field.innerHTML = `<div class="empty-state">No words detected.</div>`;
+    return;
+  }
+  field.innerHTML = words.map(w => `<span class="molecule">${escapeHtml(w)}</span>`).join("");
+}
+
+function sentimentColor(compound){
+  if(compound <= -0.05) return "#FF6B5B";
+  if(compound >= 0.05) return "#14B892";
+  return "#8B7FD9";
+}
+
+function renderPh(compound, label){
+  document.getElementById('phVerdict').textContent = label;
+  document.getElementById('phVerdict').style.color = sentimentColor(compound);
+  document.getElementById('phSub').textContent = `compound score ${compound>=0?'+':''}${compound.toFixed(2)}`;
+  const pct = ((compound + 1) / 2) * 100;
+  document.getElementById('scaleMarker').style.left = `${pct}%`;
+
+  const color = sentimentColor(compound);
+  document.getElementById('liquidFill').setAttribute('fill', color);
+  document.getElementById('liquidFill2').setAttribute('fill', color);
+  const rise = Math.max(0, Math.min(30, (compound + 1) * 15));
+  document.getElementById('liquidGroup').setAttribute('transform', `translate(0,${55 - rise})`);
+}
+
+let uploadedFileText = null;
+
+document.getElementById("inputText").addEventListener("input", () => {
+  uploadedFileText = null;
+});
+
+document.getElementById("fileInput").addEventListener("change", async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  let text = "";
+
+  if (file.name.endsWith(".txt")) {
+    text = await file.text();
+  } else if (file.name.endsWith(".docx")) {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({arrayBuffer});
+    text = result.value;
+  } else if (file.name.endsWith(".pdf")) {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+    for (let i = 0; i < pdf.numPages; i++) {
+      const page = await pdf.getPage(i + 1);
+      const content = await page.getTextContent();
+      text += content.items.map(item => item.str).join(" ") + "\n";
+    }
+  }
+
+  uploadedFileText = text;
+
+  // Show filename in the textarea instead of raw text
+  const ta = document.getElementById("inputText");
+  ta.value = "";
+  ta.placeholder = `📄 ${file.name} — ready to test`;
+});
+
+
+
+function runAnalysis(){
+  const text = uploadedFileText !== null ? uploadedFileText : document.getElementById('inputText').value;
+  document.getElementById('emptyState').style.display = 'none';
+
+  if(!text.trim()){
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('emptyState').textContent = 'Enter some text above, then press "Test it →".';
+    return;
+  }
+
+  document.getElementById('results').style.display = 'block';
+
+  const sentences = tokenizeSentences(text);
+  const words = tokenizeWords(text);
+  const charCounts = analyzeCharacters(text);
+
+  renderAnnotated(text);
+  renderRings(charCounts);
+  renderSentences(sentences);
+  renderWords(words);
+
+  const overall = scoreSentence(text);
+  renderPh(overall.compound, overall.label);
+}
+
+</script>
+
+</body>
+</html>
