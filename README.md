@@ -1,4 +1,4 @@
-# litmus — a tone test for your text
+# 🧪litmus — a tone test for your text
 
 A lightweight, browser-based text analysis tool. No data leaves your browser.
 
